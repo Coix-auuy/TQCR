@@ -1,0 +1,17 @@
+8_std.mod
+Gap = 0
+l = 15 # 点数
+
+PWL
+milp:                               Best objective 5.729786419920e+05, best bound 5.729786419920e+05, gap 0.0000%
+p_milp:                             Best objective 5.729786419920e+05, best bound 5.729786419920e+05, gap 0.0000%
+misocp_tqcr                         Best objective 5.729793261202e+05, best bound 5.729793261202e+05, gap 0.0000%
+p_misocp_tqcr:                      Best objective 5.729792890842e+05, best bound 5.729792890842e+05, gap 0.0000%
+
+PF
+milp:                               Best objective 5.729792925314e+05, best bound 5.729792925314e+05, gap 0.0000%
+p_milp:                             Best objective 5.729792925314e+05, best bound 5.729792925314e+05, gap 0.0000%
+
+
+QP:
+misocp_tqcr                         Best objective 5.729793654604e+05, best bound 5.729793654604e+05, gap 0.0000%

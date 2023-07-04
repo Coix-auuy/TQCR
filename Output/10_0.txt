@@ -1,0 +1,36 @@
+10_0_2_w.mod
+MIPGap = 0
+l = 20
+
+MIQP
+    Best objective 1.356733495031e+06, best bound 1.356733495031e+06, gap 0.0000%
+P-MIQP
+    Best objective 1.356733495031e+06, best bound 1.356733495031e+06, gap 0.0000%
+
+PWL
+MILP
+    Best objective 1.356731769415e+06, best bound 1.356731769415e+06, gap 0.0000%
+P-MILP
+    Best objective 1.356731769415e+06, best bound 1.356731769415e+06, gap 0.0000%   l = 20
+    Best objective 1.356733406896e+06, best bound 1.356733406896e+06, gap 0.0000%   l = 100
+TQCR
+    Best objective 1.356733422656e+06, best bound 1.356733422656e+06, gap 0.0000%
+P-TQCR
+    Best objective 1.356732272573e+06, best bound 1.356732272573e+06, gap 0.0000%
+
+PF
+MILP
+    Best objective 1.356721394646e+06, best bound 1.356721394646e+06, gap 0.0000%
+P-MILP
+    Best objective 1.356721394646e+06, best bound 1.356721394646e+06, gap 0.0000%   l = 20
+    Best objective 1.356732991905e+06, best bound 1.356732991905e+06, gap 0.0000%   l = 100
+    Best objective 1.356733489920e+06, best bound 1.356733489920e+06, gap 0.0000%   l = 1000
+    分段点数增加，PF的值增加，大于其它线性化的方法的值
+
+由PWL和PF调整l猜测：PF需要更多的分段点数。
+
+CR
+MIQP
+    Optimal objective 1.32445322e+06
+P-MIQP
+    Optimal objective 1.33034739e+06

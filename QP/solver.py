@@ -4,7 +4,7 @@ from common.data_reader import DataReader
 
 class Solver:
 
-    def solve(self, file_path):
+    def solve(self):
         """
         调用求解器，子类重写
         :return:
@@ -19,6 +19,7 @@ class Solver:
         :param org_or_proj: 0 - MIP or 1 - P-MIP
         """
         self.file_path = file_path
+        self.data = DataReader(self.file_path)
         self.gurobi_params = gurobi_params
         self.org_or_cr = org_or_cr
         self.org_or_proj = org_or_proj
@@ -28,7 +29,8 @@ class Solver:
         self.Runtime = 0.0
         self.p = []
         self.u = []
-        self.solve(file_path)
+        self.sc = []
+        self.solve()
 
     def write_in_file(self, file):
         """
@@ -44,13 +46,12 @@ class Solver:
 
 
 class QPSolver(Solver):
-    def solve(self, file_path):
+    def solve(self):
         """
         求解
-        :param file_path: 求解路径
         :return:
         """
-        data = DataReader(file_path)
+        data = self.data
         t_num = data.t_num
         u_num = data.u_num
         load = data.load
@@ -222,13 +223,12 @@ class QPSolver(Solver):
 # print(s.ObjVal)
 
 class SOCPSolver(Solver):
-    def solve(self, file_path):
+    def solve(self):
         """
         求解
-        :param file_path: 求解路径
         :return:
         """
-        data = DataReader(file_path)
+        data = self.data
         t_num = data.t_num
         u_num = data.u_num
         load = data.load
@@ -288,7 +288,9 @@ class SOCPSolver(Solver):
             # p^2 <= uz
             m.addConstrs((p[i, t] ** 2 <= u[i, t] * z[i, t] for i in range(1, u_num + 1) for t in range(1, t_num + 1)),
                          name="quadratic constraints 1")
-
+            m.addConstrs((z[i, t] >= 0 for i in range(1, u_num + 1) for t in range(1, t_num + 1)), name="quadratic constraints 2")
+            # m.addConstrs((u[i, t] * z[i, t] <= max_output[i - 1] ** 2 for i in range(1, u_num + 1) for t in range(1, t_num + 1)),
+            #              name="quadratic constraints 3")
             # startup cost (2)(3)
             m.addConstrs((sc[i, t] >= v[i, t] * c_h[i - 1] for i in range(1, u_num + 1) for t in range(1, t_num + 1)),
                          name="startup cost constraints 1")
@@ -378,6 +380,10 @@ class SOCPSolver(Solver):
             for i in range(1, u_num + 1):
                 for t in range(1, t_num + 1):
                     self.u[i][t] = m.getVarByName("u[%d,%d]" % (i, t)).x
+            self.sc = [[0] * (t_num + 1) for _ in range(u_num + 1)]
+            for i in range(1, u_num + 1):
+                for t in range(1, t_num + 1):
+                    self.sc[i][t] = m.getVarByName("sc[%d,%d]" % (i, t)).x
 
         except gp.GurobiError as e:
             print('Error code ' + str(e))
@@ -393,13 +399,14 @@ class SOCPSolver(Solver):
 #     s = SOCPSolver("../Data/200Unit/200_0_%d_w.mod" % i, {"MIPGap": 0, "TimeLimit": 900, "OutputFlag": 1, "Threads": 1}, 0)
 #     del s
 
-# s = SOCPSolver("../Data/5_std.mod", {"MIPGap": 0, "TimeLimit": 900, "OutputFlag": 1, "Threads": 1}, 1)
+# s = SOCPSolver("../Data/5_std.mod", {"MIPGap": 0, "TimeLimit": 900, "OutputFlag": 1, "Threads": 1}, 1, 0)
 
-# s = SOCPSolver("../Data/8_std.mod", {"MIPGap": 0, "TimeLimit": 900, "OutputFlag": 1, "Threads": 1}, 0, 0)
+# s = SOCPSolver("../Data/8_std.mod", {"MIPGap": 0, "TimeLimit": 900, "OutputFlag": 1, "Threads": 1}, 0, 1)
 
-# s = SOCPSolver("../Data/10_0_2_w.mod", {"MIPGap": 0, "TimeLimit": 900, "OutputFlag": 1}, 0, 1)
 
-# s = SOCPSolver("../Data/200Unit/200_0_3_w.mod", {"MIPGap": 0, "TimeLimit": 900, "OutputFlag": 1, "Threads": 1}, 1, 1)
+# s = SOCPSolver("../Data/10_0_2_w.mod", {"MIPGap": 0, "TimeLimit": 900, "OutputFlag": 1}, 1, 0)
+
+# s = SOCPSolver("../Data/200Unit/200_0_3_w.mod", {"MIPGap": 0, "TimeLimit": 900, "OutputFlag": 1, "Threads": 1}, 1, 0)
 
 # s = SOCPSolver("../Data/Based8Std/c13_based_8_std.mod", {"MIPGap": 0, "TimeLimit": 900, "OutputFlag": 1, "Threads": 1}, 1, 1)
 
@@ -407,14 +414,13 @@ class SOCPSolver(Solver):
 
 
 class QCRSolver(Solver):
-    def solve(self, file_path):
+    def solve(self):
         """
         求解
-        :param file_path: 求解路径
         :return:
         """
         # 拿到样例数据
-        data = DataReader(file_path)
+        data = self.data
         t_num = data.t_num
         u_num = data.u_num
         load = data.load
@@ -447,7 +453,7 @@ class QCRSolver(Solver):
             r_on = [(r_on[i] - min_output[i]) / (max_output[i] - min_output[i]) for i in range(u_num)]
             r_off = [(r_off[i] - min_output[i]) / (max_output[i] - min_output[i]) for i in range(u_num)]
         # 计算 QCR 附加项的系数
-        socp_cr = SOCPSolver(file_path, {"MIPGap": 0, "TimeLimit": 900, "OutputFlag": self.gurobi_params["OutputFlag"], "Threads": 1}, 1,
+        socp_cr = SOCPSolver(self.file_path, {"MIPGap": 0, "TimeLimit": 900, "OutputFlag": self.gurobi_params["OutputFlag"], "Threads": 1}, 1,
                              self.org_or_proj)
         upsilon = [[0] * (t_num + 1) for _ in range(u_num + 1)]
         for i in range(1, u_num + 1):

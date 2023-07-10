@@ -115,4 +115,4 @@ class DataReader:
         self.read_data(file_path)
 
 
-s = DataReader("../Data/8_std.mod")
+s = DataReader("Data/8_std.mod")

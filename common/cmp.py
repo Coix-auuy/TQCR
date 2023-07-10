@@ -1,5 +1,5 @@
-f1 = open("../QP/Out/tqcr_p.out", 'r')
-f2 = open("../QP/Out/p_tqcr_p.out", 'r')
+f1 = open("../Out/QP/tqcr_p.out", 'r')
+f2 = open("../Out/QP/p_tqcr_p.out", 'r')
 
 for i in range(20):
     x = list(f1.readline().split())

@@ -1,0 +1,24 @@
+base8std_0:
+    MIPGap = 1e-4
+    TimeLimit = 3600
+    Threads = 1
+    nohup.out
+
+200Unit_0
+    MIPGap = 1e-4
+    TimeLimit = 3600
+    Threads = 1
+    nohup1.out
+
+200Unit_1
+    MIPGap = 1e-3
+    TimeLimit = 3600
+    Threads = 1
+    nohup.out
+
+based8std_1:
+    MIPGap = 1e-3
+    TimeLimit = 900
+    Threads = 1
+
+    
